@@ -668,6 +668,67 @@ img {
   }
 }
 
+/* ===== LOGIN PAGE ===== */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 24px;
+}
+
+.login-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 40px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
+.login-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.login-card h2 {
+  margin-bottom: 8px;
+}
+
+.login-card .form-group {
+  text-align: left;
+}
+
+/* ===== FILTER BUTTONS (admin) ===== */
+.filter-btn {
+  padding: 8px 20px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 500;
+  background: white;
+  transition: all .2s;
+  font-size: .875rem;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
+}
+
+/* ===== NORMAS CHECKBOX STATES ===== */
+.normas-check-label:has(input:checked) {
+  background: #d1fae5;
+  border: 2px solid var(--success);
+}
+
+.normas-check-label:has(input:not(:checked)) {
+  border: 2px solid transparent;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 640px) {
   .hero h1 {
@@ -689,5 +750,18 @@ img {
 
   .stats-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .login-card {
+    padding: 24px;
+  }
+
+  .admin-tabs {
+    flex-wrap: wrap;
+  }
+
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
