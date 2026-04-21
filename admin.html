@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Mercado Amigo</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">Mercado<span>Amigo</span></a>
+    <div class="nav-links">
+      <a href="index.html">Volver al sitio</a>
+    </div>
+  </nav>
+
+  <div class="admin-container">
+
+    <!-- HEADER -->
+    <div class="admin-header">
+      <h1>Panel de AdministraciÃ³n</h1>
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="avisos" onclick="switchAdminTab('avisos')">Avisos</button>
+        <button class="admin-tab" data-tab="config" onclick="switchAdminTab('config')">ConfiguraciÃ³n</button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-label">Total avisos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statPendientes">0</div>
+        <div class="stat-label">Pendientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statAprobados">0</div>
+        <div class="stat-label">Aprobados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statPopulares">0</div>
+        <div class="stat-label">Populares</div>
+      </div>
+    </div>
+
+    <!-- PANEL AVISOS -->
+    <div class="admin-panel" id="panel-avisos">
+      <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="admin-tab active" onclick="filterAdminTable('todos')">Todos</button>
+        <button class="admin-tab" onclick="filterAdminTable('pendientes')">Pendientes</button>
+        <button class="admin-tab" onclick="filterAdminTable('aprobados')">Aprobados</button>
+        <button class="admin-tab" onclick="filterAdminTable('restringidos')">Restringidos</button>
+      </div>
+
+      <div class="admin-table">
+        <table>
+          <thead>
+            <tr>
+              <th>TÃ­tulo</th>
+              <th>CategorÃ­a</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody">
+            <!-- Se llenan dinÃ¡micamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL CONFIGURACIÃ“N -->
+    <div class="admin-panel" id="panel-config" style="display:none;">
+      <div class="settings-section">
+        <h3>LÃ­mites del sistema</h3>
+
+        <div class="setting-row">
+          <label>MÃ¡ximo de fotos por aviso</label>
+          <input type="number" id="setFotos" min="1" max="10" value="3">
+        </div>
+
+        <div class="setting-row">
+          <label>MÃ¡ximo de caracteres por descripciÃ³n</label>
+          <input type="number" id="setCaracteres" min="100" max="5000" value="500" step="100">
+        </div>
+
+        <div class="setting-row">
+          <label>MÃ¡ximo de avisos por usuario</label>
+          <input type="number" id="setAvisos" min="1" max="50" value="5">
+        </div>
+
+        <button class="btn-submit" style="margin-top:16px;" onclick="saveAdminConfig()">Guardar configuraciÃ³n</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAdmin();
+    });
+  </script>
+</body>
+</html>
