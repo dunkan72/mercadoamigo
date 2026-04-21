@@ -1,7 +1,7 @@
-/* ===== MERCADO AMIGO - Main JavaScript ===== */
+/* ===== MERCADO AMIGO - Main JavaScript v2 ===== */
 
-// ---------- CATEGORÃAS ----------
-const CATEGORIAS = [
+// ---------- CATEGORÃAS POR DEFECTO ----------
+const DEFAULT_CATEGORIAS = [
   { id: 'vehiculos', nombre: 'VehÃ­culos', icono: 'ðŸš—' },
   { id: 'inmuebles', nombre: 'Inmuebles', icono: 'ðŸ ' },
   { id: 'empleo', nombre: 'Empleo', icono: 'ðŸ’¼' },
@@ -21,6 +21,20 @@ const DEFAULT_CONFIG = {
   maxAvisosPorUsuario: 5
 };
 
+// ---------- CREDENCIALES ADMIN POR DEFECTO ----------
+const DEFAULT_ADMIN = {
+  usuario: 'admin',
+  contrasena: 'MercadoAmigo2026!'
+};
+
+// ---------- TEXTO DE NORMAS POR DEFECTO ----------
+const DEFAULT_NORMAS = `Normas de Contenido y Claridad
+
+â€¢ Claridad y sÃ­ntesis: Los mensajes deben ser fÃ¡ciles de leer, entender y recordar.
+â€¢ Veracidad: La informaciÃ³n debe ser verÃ­dica y no prestarse a error, engaÃ±o o confusiÃ³n.
+â€¢ Respeto: ProhibiciÃ³n de lenguaje ofensivo, discriminatorio, groserÃ­as o contenido inapropiado.
+â€¢ IdentificaciÃ³n: Todo aviso debe incluir el emisor (quiÃ©n lo publica), la fecha y la finalidad clara.`;
+
 // ---------- STORAGE HELPER ----------
 const Storage = {
   get(key, fallback) {
@@ -36,7 +50,7 @@ const Storage = {
   }
 };
 
-// ---------- OBTENER DATOS ----------
+// ---------- GETTERS / SETTERS ----------
 function getAvisos() {
   return Storage.get('ma_avisos', []);
 }
@@ -51,6 +65,38 @@ function getConfig() {
 
 function saveConfig(config) {
   Storage.set('ma_config', config);
+}
+
+function getCategorias() {
+  return Storage.get('ma_categorias', DEFAULT_CATEGORIAS);
+}
+
+function saveCategorias(cats) {
+  Storage.set('ma_categorias', cats);
+}
+
+function getNormas() {
+  return Storage.get('ma_normas', DEFAULT_NORMAS);
+}
+
+function saveNormas(texto) {
+  Storage.set('ma_normas', texto);
+}
+
+function getAdmin() {
+  return Storage.get('ma_admin', DEFAULT_ADMIN);
+}
+
+function saveAdmin(adminData) {
+  Storage.set('ma_admin', adminData);
+}
+
+function isAdminLoggedIn() {
+  return sessionStorage.getItem('ma_admin_logged') === 'true';
+}
+
+function setAdminLoggedIn(val) {
+  sessionStorage.setItem('ma_admin_logged', val ? 'true' : 'false');
 }
 
 // ---------- GENERAR ID ÃšNICO ----------
@@ -89,12 +135,32 @@ function filesToBase64(files) {
   });
 }
 
+// ---------- CONTAR AVISOS POR USUARIO ----------
+function contarAvisosUsuario(correo, telefono) {
+  const avisos = getAvisos();
+  const identificador = correo || telefono;
+  if (!identificador) return 0;
+  return avisos.filter(a => {
+    if (correo && a.correo) return a.correo.toLowerCase() === correo.toLowerCase();
+    if (telefono && a.telefono) return a.telefono === telefono;
+    return false;
+  }).length;
+}
+
+// ---------- OBTENER NOMBRE DE CATEGORÃA ----------
+function getCategoryName(catId) {
+  const cats = getCategorias();
+  const cat = cats.find(c => c.id === catId);
+  return cat ? cat.nombre : catId;
+}
+
 // ---------- RENDER CATEGORÃAS (index) ----------
 function renderCategories(containerId, onSelect) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  container.innerHTML = CATEGORIAS.map(cat => `
+  const cats = getCategorias();
+  container.innerHTML = cats.map(cat => `
     <button class="cat-btn" data-cat="${cat.id}" onclick="${onSelect}('${cat.id}')">
       <div class="icon">${cat.icono}</div>
       <div>${cat.nombre}</div>
@@ -115,16 +181,16 @@ function renderCards(containerId, avisos) {
   container.innerHTML = avisos.map(aviso => {
     const fotoPrincipal = aviso.fotos && aviso.fotos.length > 0
       ? `<img src="${aviso.fotos[0]}" alt="${aviso.titulo}">`
-      : 'Sin imagen';
+      : '<span style="font-size:.8rem;color:#9ca3af;">Sin imagen</span>';
 
     const popularBadge = aviso.popular ? '<span class="popular-badge">â­ Popular</span>' : '';
 
     const whatsappLink = aviso.whatsapp
-      ? `<a href="https://wa.me/${aviso.whatsapp.replace(/\D/g, '')}" target="_blank" class="btn-whatsapp">ðŸ“± WhatsApp</a>`
+      ? `<a href="https://wa.me/${aviso.whatsapp.replace(/\D/g, '')}" target="_blank" class="btn-whatsapp" onclick="event.stopPropagation()">ðŸ“± WhatsApp</a>`
       : '';
 
     const phoneLink = aviso.telefono
-      ? `<a href="tel:${aviso.telefono}" class="btn-phone">ðŸ“ž Llamar</a>`
+      ? `<a href="tel:${aviso.telefono}" class="btn-phone" onclick="event.stopPropagation()">ðŸ“ž Llamar</a>`
       : '';
 
     return `
@@ -143,12 +209,6 @@ function renderCards(containerId, avisos) {
       </div>
     `;
   }).join('');
-}
-
-// ---------- OBTENER NOMBRE DE CATEGORÃA ----------
-function getCategoryName(catId) {
-  const cat = CATEGORIAS.find(c => c.id === catId);
-  return cat ? cat.nombre : catId;
 }
 
 // ---------- MODAL DE AVISO ----------
@@ -194,15 +254,18 @@ function closeModal() {
 let filtroActual = '';
 
 function filtrarPorCategoria(catId) {
+  if (filtroActual === catId) {
+    limpiarFiltro();
+    return;
+  }
+
   filtroActual = catId;
 
-  // Actualizar botones activos
   document.querySelectorAll('.cat-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.cat === catId);
   });
 
-  const avisos = getAvisos().filter(a => a.estado === 'aprobado' && a.categoria === catId);
-  renderCards('avisosGrid', avisos);
+  buscarAvisos();
 }
 
 function buscarAvisos() {
@@ -219,7 +282,8 @@ function buscarAvisos() {
     avisos = avisos.filter(a =>
       a.titulo.toLowerCase().includes(query) ||
       a.descripcion.toLowerCase().includes(query) ||
-      getCategoryName(a.categoria).toLowerCase().includes(query)
+      getCategoryName(a.categoria).toLowerCase().includes(query) ||
+      (a.nombre && a.nombre.toLowerCase().includes(query))
     );
   }
 
@@ -234,6 +298,44 @@ function limpiarFiltro() {
   loadMainPage();
 }
 
+// ---------- POPUP NORMAS ----------
+function openNormasPopup() {
+  const popup = document.getElementById('normasPopup');
+  if (!popup) return;
+
+  const textoNormas = document.getElementById('normasTextDisplay');
+  if (textoNormas) textoNormas.textContent = getNormas();
+
+  const checkbox = document.getElementById('normasCheckbox');
+  if (checkbox) checkbox.checked = false;
+
+  const confirmBtn = document.getElementById('normasConfirmBtn');
+  if (confirmBtn) confirmBtn.disabled = true;
+
+  popup.classList.add('active');
+}
+
+function closeNormasPopup() {
+  const popup = document.getElementById('normasPopup');
+  if (popup) popup.classList.remove('active');
+}
+
+function toggleNormasConfirm() {
+  const checkbox = document.getElementById('normasCheckbox');
+  const confirmBtn = document.getElementById('normasConfirmBtn');
+  if (checkbox && confirmBtn) {
+    confirmBtn.disabled = !checkbox.checked;
+  }
+}
+
+function confirmarNormas() {
+  closeNormasPopup();
+  const formSection = document.getElementById('publicar');
+  if (formSection) {
+    formSection.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
 // ---------- ENVIAR NUEVO AVISO ----------
 async function submitAviso(event) {
   event.preventDefault();
@@ -244,18 +346,27 @@ async function submitAviso(event) {
   const titulo = document.getElementById('avisoTitulo').value.trim();
   const categoria = document.getElementById('avisoCategoria').value;
   const descripcion = document.getElementById('avisoDescripcion').value.trim();
+  const nombre = document.getElementById('avisoNombre').value.trim();
+  const correo = document.getElementById('avisoCorreo').value.trim();
   const telefono = document.getElementById('avisoTelefono').value.trim();
   const whatsapp = document.getElementById('avisoWhatsapp').value.trim();
   const fileInput = document.getElementById('avisoFotos');
 
   // Validaciones
-  if (!titulo || !categoria || !descripcion) {
+  if (!titulo || !categoria || !descripcion || !nombre || !correo) {
     showToast('Por favor completa todos los campos obligatorios', 'error');
     return;
   }
 
   if (descripcion.length > config.maxCaracteres) {
     showToast(`La descripciÃ³n no puede exceder ${config.maxCaracteres} caracteres`, 'error');
+    return;
+  }
+
+  // Verificar lÃ­mite de avisos por usuario
+  const avisoCount = contarAvisosUsuario(correo, telefono);
+  if (avisoCount >= config.maxAvisosPorUsuario) {
+    showToast(`Has alcanzado el lÃ­mite de ${config.maxAvisosPorUsuario} avisos`, 'error');
     return;
   }
 
@@ -274,13 +385,14 @@ async function submitAviso(event) {
     titulo,
     categoria,
     descripcion,
+    nombre,
+    correo,
     telefono,
     whatsapp,
     fotos,
     estado: 'pendiente',
     popular: false,
-    fecha: new Date().toISOString(),
-    usuario: 'anonimo'
+    fecha: new Date().toISOString()
   };
 
   avisos.push(nuevoAviso);
@@ -289,7 +401,6 @@ async function submitAviso(event) {
   showToast('Aviso enviado correctamente. SerÃ¡ publicado tras aprobaciÃ³n.');
   event.target.reset();
 
-  // Limpiar preview de fotos
   const preview = document.getElementById('fotosPreview');
   if (preview) preview.innerHTML = '';
 }
@@ -318,6 +429,7 @@ function previewFotos(event) {
 // ---------- CARGAR PÃGINA PRINCIPAL ----------
 function loadMainPage() {
   const avisos = getAvisos().filter(a => a.estado === 'aprobado');
+  const cats = getCategorias();
 
   // Populares
   const populares = avisos.filter(a => a.popular);
@@ -333,16 +445,58 @@ function loadMainPage() {
   const catSelect = document.getElementById('avisoCategoria');
   if (catSelect) {
     catSelect.innerHTML = '<option value="">Selecciona una categorÃ­a</option>' +
-      CATEGORIAS.map(c => `<option value="${c.id}">${c.icono} ${c.nombre}</option>`).join('');
+      cats.map(c => `<option value="${c.id}">${c.icono} ${c.nombre}</option>`).join('');
   }
+}
+
+// ============ FUNCIONES DEL LOGIN ADMIN ============
+
+function checkAdminAccess() {
+  if (!isAdminLoggedIn()) {
+    document.getElementById('loginSection').style.display = 'flex';
+    document.getElementById('adminContent').style.display = 'none';
+  } else {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    loadAdmin();
+  }
+}
+
+function adminLogin(event) {
+  event.preventDefault();
+
+  const usuario = document.getElementById('loginUsuario').value.trim();
+  const contrasena = document.getElementById('loginContrasena').value;
+
+  const adminData = getAdmin();
+
+  if (usuario === adminData.usuario && contrasena === adminData.contrasena) {
+    setAdminLoggedIn(true);
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    loadAdmin();
+    showToast('Bienvenido al panel de administraciÃ³n');
+  } else {
+    showToast('Usuario o contraseÃ±a incorrectos', 'error');
+  }
+}
+
+function adminLogout() {
+  setAdminLoggedIn(false);
+  document.getElementById('loginSection').style.display = 'flex';
+  document.getElementById('adminContent').style.display = 'none';
+  document.getElementById('loginUsuario').value = '';
+  document.getElementById('loginContrasena').value = '';
+  showToast('SesiÃ³n cerrada');
 }
 
 // ============ FUNCIONES DEL ADMIN ============
 
-// ---------- CARGAR ADMIN ----------
 function loadAdmin() {
   const avisos = getAvisos();
   const config = getConfig();
+  const normas = getNormas();
+  const adminData = getAdmin();
 
   // Stats
   document.getElementById('statTotal').textContent = avisos.length;
@@ -355,7 +509,16 @@ function loadAdmin() {
   document.getElementById('setCaracteres').value = config.maxCaracteres;
   document.getElementById('setAvisos').value = config.maxAvisosPorUsuario;
 
+  // Normas
+  const normasTextarea = document.getElementById('normasTextarea');
+  if (normasTextarea) normasTextarea.value = normas;
+
+  // Admin credentials display
+  const adminUserDisplay = document.getElementById('adminUserDisplay');
+  if (adminUserDisplay) adminUserDisplay.textContent = adminData.usuario;
+
   renderAdminTable();
+  renderCategoriasAdmin();
 }
 
 // ---------- RENDER TABLA ADMIN ----------
@@ -370,7 +533,7 @@ function renderAdminTable(filter = 'todos') {
   if (!tbody) return;
 
   if (avisos.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;">No hay avisos para mostrar.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;">No hay avisos para mostrar.</td></tr>';
     return;
   }
 
@@ -388,14 +551,16 @@ function renderAdminTable(filter = 'todos') {
     }[aviso.estado] || aviso.estado;
 
     const fecha = new Date(aviso.fecha).toLocaleDateString('es-ES');
-    const popularIcon = aviso.popular ? 'â­' : '';
+    const popularIcon = aviso.popular ? ' â­' : '';
+    const autorInfo = aviso.nombre || 'N/A';
 
     return `
       <tr>
         <td>${aviso.titulo}</td>
         <td>${getCategoryName(aviso.categoria)}</td>
+        <td>${autorInfo}</td>
         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-        <td>${fecha} ${popularIcon}</td>
+        <td>${fecha}${popularIcon}</td>
         <td>
           <div class="action-btns">
             <button class="action-btn btn-approve" onclick="adminAction('${aviso.id}','aprobar')" title="Aprobar">âœ“</button>
@@ -455,6 +620,148 @@ function saveAdminConfig() {
   showToast('ConfiguraciÃ³n guardada correctamente');
 }
 
+// ---------- GUARDAR NORMAS ----------
+function saveNormasAdmin() {
+  const textarea = document.getElementById('normasTextarea');
+  if (!textarea) return;
+
+  const texto = textarea.value.trim();
+  if (!texto) {
+    showToast('El texto de normas no puede estar vacÃ­o', 'error');
+    return;
+  }
+
+  saveNormas(texto);
+  showToast('Normas actualizadas correctamente');
+}
+
+// ---------- CAMBIAR CREDENCIALES ADMIN ----------
+function changeAdminCredentials(event) {
+  event.preventDefault();
+
+  const nuevoUsuario = document.getElementById('newUsuario').value.trim();
+  const nuevaContrasena = document.getElementById('newContrasena').value;
+  const confirmarContrasena = document.getElementById('confirmContrasena').value;
+
+  if (!nuevoUsuario || !nuevaContrasena) {
+    showToast('Todos los campos son obligatorios', 'error');
+    return;
+  }
+
+  if (nuevaContrasena !== confirmarContrasena) {
+    showToast('Las contraseÃ±as no coinciden', 'error');
+    return;
+  }
+
+  if (nuevaContrasena.length < 6) {
+    showToast('La contraseÃ±a debe tener al menos 6 caracteres', 'error');
+    return;
+  }
+
+  saveAdmin({ usuario: nuevoUsuario, contrasena: nuevaContrasena });
+  document.getElementById('adminUserDisplay').textContent = nuevoUsuario;
+
+  document.getElementById('newUsuario').value = '';
+  document.getElementById('newContrasena').value = '';
+  document.getElementById('confirmContrasena').value = '';
+
+  showToast('Credenciales actualizadas correctamente');
+}
+
+// ============ GESTIÃ“N DE CATEGORÃAS ============
+
+function renderCategoriasAdmin() {
+  const cats = getCategorias();
+  const tbody = document.getElementById('categoriasTableBody');
+  if (!tbody) return;
+
+  if (cats.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;">No hay categorÃ­as.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = cats.map(cat => `
+    <tr>
+      <td>${cat.icono}</td>
+      <td>${cat.nombre}</td>
+      <td>${cat.id}</td>
+      <td>
+        <div class="action-btns">
+          <button class="action-btn btn-restrict" onclick="editCategoria('${cat.id}')" title="Editar">âœï¸</button>
+          <button class="action-btn btn-delete" onclick="deleteCategoria('${cat.id}')" title="Eliminar">âœ•</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function addCategoria(event) {
+  event.preventDefault();
+
+  const nombre = document.getElementById('catNombre').value.trim();
+  const icono = document.getElementById('catIcono').value.trim();
+
+  if (!nombre || !icono) {
+    showToast('Nombre e icono son obligatorios', 'error');
+    return;
+  }
+
+  const cats = getCategorias();
+  const id = nombre.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+  if (cats.find(c => c.id === id)) {
+    showToast('Ya existe una categorÃ­a con ese nombre', 'error');
+    return;
+  }
+
+  cats.push({ id, nombre, icono });
+  saveCategorias(cats);
+
+  document.getElementById('catNombre').value = '';
+  document.getElementById('catIcono').value = '';
+
+  renderCategoriasAdmin();
+  showToast('CategorÃ­a agregada correctamente');
+}
+
+function editCategoria(catId) {
+  const cats = getCategorias();
+  const cat = cats.find(c => c.id === catId);
+  if (!cat) return;
+
+  const nuevoNombre = prompt('Nuevo nombre:', cat.nombre);
+  if (nuevoNombre === null) return;
+
+  const nuevoIcono = prompt('Nuevo icono:', cat.icono);
+  if (nuevoIcono === null) return;
+
+  if (!nuevoNombre.trim() || !nuevoIcono.trim()) {
+    showToast('Nombre e icono son obligatorios', 'error');
+    return;
+  }
+
+  const index = cats.findIndex(c => c.id === catId);
+  cats[index].nombre = nuevoNombre.trim();
+  cats[index].icono = nuevoIcono.trim();
+
+  saveCategorias(cats);
+  renderCategoriasAdmin();
+  showToast('CategorÃ­a actualizada');
+}
+
+function deleteCategoria(catId) {
+  const cats = getCategorias();
+  const cat = cats.find(c => c.id === catId);
+  if (!cat) return;
+
+  if (!confirm(`Â¿Eliminar la categorÃ­a "${cat.nombre}"? Los avisos con esta categorÃ­a no se eliminarÃ¡n.`)) return;
+
+  const newCats = cats.filter(c => c.id !== catId);
+  saveCategorias(newCats);
+  renderCategoriasAdmin();
+  showToast('CategorÃ­a eliminada');
+}
+
 // ---------- TABS DEL ADMIN ----------
 function switchAdminTab(tab) {
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
@@ -465,6 +772,8 @@ function switchAdminTab(tab) {
 
   if (tab === 'avisos') {
     renderAdminTable('todos');
+  } else if (tab === 'categorias') {
+    renderCategoriasAdmin();
   }
 }
 
