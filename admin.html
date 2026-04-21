@@ -13,97 +13,184 @@
     <a href="index.html" class="logo">Mercado<span>Amigo</span></a>
     <div class="nav-links">
       <a href="index.html">Volver al sitio</a>
+      <a href="#" class="btn-admin" id="btnLogout" onclick="adminLogout()" style="display:none;">Cerrar sesiÃ³n</a>
     </div>
   </nav>
 
-  <div class="admin-container">
-
-    <!-- HEADER -->
-    <div class="admin-header">
-      <h1>Panel de AdministraciÃ³n</h1>
-      <div class="admin-tabs">
-        <button class="admin-tab active" data-tab="avisos" onclick="switchAdminTab('avisos')">Avisos</button>
-        <button class="admin-tab" data-tab="config" onclick="switchAdminTab('config')">ConfiguraciÃ³n</button>
-      </div>
+  <!-- LOGIN SECTION -->
+  <div id="loginSection" class="login-container">
+    <div class="login-card">
+      <div class="login-icon">ðŸ”</div>
+      <h2>Acceso de Administrador</h2>
+      <p style="color:#6b7280;margin-bottom:24px;">Ingresa tus credenciales para continuar</p>
+      <form onsubmit="adminLogin(event)">
+        <div class="form-group">
+          <label>Usuario</label>
+          <input type="text" id="loginUsuario" placeholder="Nombre de usuario" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>ContraseÃ±a</label>
+          <input type="password" id="loginContrasena" placeholder="ContraseÃ±a" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-submit">Iniciar sesiÃ³n</button>
+      </form>
+      <p style="margin-top:16px;font-size:.8rem;color:#9ca3af;">Usuario por defecto: <strong>admin</strong> | ContraseÃ±a: <strong>MercadoAmigo2026!</strong></p>
     </div>
+  </div>
 
-    <!-- STATS -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-num" id="statTotal">0</div>
-        <div class="stat-label">Total avisos</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statPendientes">0</div>
-        <div class="stat-label">Pendientes</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statAprobados">0</div>
-        <div class="stat-label">Aprobados</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statPopulares">0</div>
-        <div class="stat-label">Populares</div>
-      </div>
-    </div>
+  <!-- ADMIN CONTENT (hidden until login) -->
+  <div id="adminContent" style="display:none;">
+    <div class="admin-container">
 
-    <!-- PANEL AVISOS -->
-    <div class="admin-panel" id="panel-avisos">
-      <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="admin-tab active" onclick="filterAdminTable('todos')">Todos</button>
-        <button class="admin-tab" onclick="filterAdminTable('pendientes')">Pendientes</button>
-        <button class="admin-tab" onclick="filterAdminTable('aprobados')">Aprobados</button>
-        <button class="admin-tab" onclick="filterAdminTable('restringidos')">Restringidos</button>
+      <!-- HEADER -->
+      <div class="admin-header">
+        <div>
+          <h1>Panel de AdministraciÃ³n</h1>
+          <p style="color:#6b7280;font-size:.875rem;">Conectado como: <strong id="adminUserDisplay">admin</strong></p>
+        </div>
+        <div class="admin-tabs">
+          <button class="admin-tab active" data-tab="avisos" onclick="switchAdminTab('avisos')">Avisos</button>
+          <button class="admin-tab" data-tab="categorias" onclick="switchAdminTab('categorias')">CategorÃ­as</button>
+          <button class="admin-tab" data-tab="config" onclick="switchAdminTab('config')">ConfiguraciÃ³n</button>
+        </div>
       </div>
 
-      <div class="admin-table">
-        <table>
-          <thead>
-            <tr>
-              <th>TÃ­tulo</th>
-              <th>CategorÃ­a</th>
-              <th>Estado</th>
-              <th>Fecha</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="adminTableBody">
-            <!-- Se llenan dinÃ¡micamente -->
-          </tbody>
-        </table>
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="statTotal">0</div>
+          <div class="stat-label">Total avisos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statPendientes">0</div>
+          <div class="stat-label">Pendientes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statAprobados">0</div>
+          <div class="stat-label">Aprobados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statPopulares">0</div>
+          <div class="stat-label">Populares</div>
+        </div>
       </div>
-    </div>
 
-    <!-- PANEL CONFIGURACIÃ“N -->
-    <div class="admin-panel" id="panel-config" style="display:none;">
-      <div class="settings-section">
-        <h3>LÃ­mites del sistema</h3>
-
-        <div class="setting-row">
-          <label>MÃ¡ximo de fotos por aviso</label>
-          <input type="number" id="setFotos" min="1" max="10" value="3">
+      <!-- ===== PANEL AVISOS ===== -->
+      <div class="admin-panel" id="panel-avisos">
+        <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="filter-btn active" onclick="filterAdminTable('todos')">Todos</button>
+          <button class="filter-btn" onclick="filterAdminTable('pendientes')">Pendientes</button>
+          <button class="filter-btn" onclick="filterAdminTable('aprobados')">Aprobados</button>
+          <button class="filter-btn" onclick="filterAdminTable('restringidos')">Restringidos</button>
         </div>
 
-        <div class="setting-row">
-          <label>MÃ¡ximo de caracteres por descripciÃ³n</label>
-          <input type="number" id="setCaracteres" min="100" max="5000" value="500" step="100">
+        <div class="admin-table">
+          <table>
+            <thead>
+              <tr>
+                <th>TÃ­tulo</th>
+                <th>CategorÃ­a</th>
+                <th>Autor</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody"></tbody>
+          </table>
         </div>
-
-        <div class="setting-row">
-          <label>MÃ¡ximo de avisos por usuario</label>
-          <input type="number" id="setAvisos" min="1" max="50" value="5">
-        </div>
-
-        <button class="btn-submit" style="margin-top:16px;" onclick="saveAdminConfig()">Guardar configuraciÃ³n</button>
       </div>
-    </div>
 
+      <!-- ===== PANEL CATEGORÃAS ===== -->
+      <div class="admin-panel" id="panel-categorias" style="display:none;">
+        <div class="settings-section">
+          <h3>Agregar nueva categorÃ­a</h3>
+          <form onsubmit="addCategoria(event)" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:24px;">
+            <div class="form-group" style="margin-bottom:0;flex:1;min-width:200px;">
+              <label>Nombre</label>
+              <input type="text" id="catNombre" placeholder="Ej: TecnologÃ­a" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0;width:100px;">
+              <label>Icono (emoji)</label>
+              <input type="text" id="catIcono" placeholder="ðŸ“±" required maxlength="4">
+            </div>
+            <button type="submit" class="btn-submit" style="width:auto;padding:12px 24px;">Agregar</button>
+          </form>
+
+          <h3>CategorÃ­as existentes</h3>
+          <div class="admin-table" style="margin-top:12px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Icono</th>
+                  <th>Nombre</th>
+                  <th>ID</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="categoriasTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PANEL CONFIGURACIÃ“N ===== -->
+      <div class="admin-panel" id="panel-config" style="display:none;">
+
+        <!-- LÃ­mites -->
+        <div class="settings-section" style="margin-bottom:24px;">
+          <h3>LÃ­mites del sistema</h3>
+          <div class="setting-row">
+            <label>MÃ¡ximo de fotos por aviso</label>
+            <input type="number" id="setFotos" min="1" max="10" value="3">
+          </div>
+          <div class="setting-row">
+            <label>MÃ¡ximo de caracteres por descripciÃ³n</label>
+            <input type="number" id="setCaracteres" min="100" max="5000" value="500" step="100">
+          </div>
+          <div class="setting-row">
+            <label>MÃ¡ximo de avisos por usuario</label>
+            <input type="number" id="setAvisos" min="1" max="50" value="5">
+          </div>
+          <button class="btn-submit" style="margin-top:16px;" onclick="saveAdminConfig()">Guardar lÃ­mites</button>
+        </div>
+
+        <!-- Texto de normas -->
+        <div class="settings-section" style="margin-bottom:24px;">
+          <h3>Normas de contenido (aparece en el popup de publicaciÃ³n)</h3>
+          <textarea id="normasTextarea" rows="10" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:8px;font-size:.9rem;font-family:inherit;resize:vertical;line-height:1.6;"></textarea>
+          <button class="btn-submit" style="margin-top:12px;" onclick="saveNormasAdmin()">Guardar normas</button>
+        </div>
+
+        <!-- Cambiar credenciales -->
+        <div class="settings-section">
+          <h3>Cambiar credenciales de administrador</h3>
+          <form onsubmit="changeAdminCredentials(event)">
+            <div class="form-group">
+              <label>Nuevo usuario</label>
+              <input type="text" id="newUsuario" placeholder="Nuevo nombre de usuario" required autocomplete="username">
+            </div>
+            <div class="form-group">
+              <label>Nueva contraseÃ±a</label>
+              <input type="password" id="newContrasena" placeholder="Nueva contraseÃ±a" required autocomplete="new-password" minlength="6">
+            </div>
+            <div class="form-group">
+              <label>Confirmar contraseÃ±a</label>
+              <input type="password" id="confirmContrasena" placeholder="Repite la contraseÃ±a" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn-submit">Actualizar credenciales</button>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
   </div>
 
   <script src="js/app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      loadAdmin();
+      checkAdminAccess();
     });
   </script>
 </body>
