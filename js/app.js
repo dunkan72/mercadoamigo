@@ -330,15 +330,35 @@ function toggleNormasConfirm() {
 
 function confirmarNormas() {
   closeNormasPopup();
-  const formSection = document.getElementById('publicar');
-  if (formSection) {
-    formSection.scrollIntoView({ behavior: 'smooth' });
+  // After confirming norms, submit the form
+  const form = document.getElementById('avisoForm');
+  if (form) {
+    // Manually trigger the async submit
+    submitAvisoFromNormas();
   }
 }
 
-// ---------- ENVIAR NUEVO AVISO ----------
-async function submitAviso(event) {
+// ---------- OPEN NORMAS FROM FORM ----------
+function openNormasFromForm(event) {
   event.preventDefault();
+
+  const titulo = document.getElementById('avisoTitulo').value.trim();
+  const categoria = document.getElementById('avisoCategoria').value;
+  const descripcion = document.getElementById('avisoDescripcion').value.trim();
+  const nombre = document.getElementById('avisoNombre').value.trim();
+  const correo = document.getElementById('avisoCorreo').value.trim();
+
+  if (!titulo || !categoria || !descripcion || !nombre || !correo) {
+    showToast('Por favor completa todos los campos obligatorios (*)', 'error');
+    return;
+  }
+
+  // Open norms popup before submitting
+  openNormasPopup();
+}
+
+// ---------- ENVIAR NUEVO AVISO (despuÃ©s de confirmar normas) ----------
+async function submitAvisoFromNormas() {
 
   const config = getConfig();
   const avisos = getAvisos();
