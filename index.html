@@ -12,7 +12,7 @@
   <nav class="navbar">
     <a href="index.html" class="logo">Mercado<span>Amigo</span></a>
     <div class="nav-links">
-      <a href="#publicar">Publicar aviso</a>
+      <a href="#" onclick="openNormasPopup(); return false;">Publicar aviso</a>
       <a href="admin.html" class="btn-admin">Admin</a>
     </div>
   </nav>
@@ -22,7 +22,7 @@
     <h1>Encuentra lo que necesitas en tu comunidad</h1>
     <p>Publica y descubre avisos de tu barrio de forma fÃ¡cil y gratuita</p>
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Buscar avisos..." onkeyup="buscarAvisos()">
+      <input type="text" id="searchInput" placeholder="Buscar avisos..." oninput="buscarAvisos()">
       <button onclick="buscarAvisos()">Buscar</button>
       <button onclick="limpiarFiltro()" style="background:#6b7280;">Limpiar</button>
     </div>
@@ -31,28 +31,48 @@
   <!-- CATEGORÃAS -->
   <section class="categories">
     <h2>CategorÃ­as</h2>
-    <div class="cat-grid" id="categoriasContainer">
-      <!-- Se llenan dinÃ¡micamente -->
-    </div>
+    <div class="cat-grid" id="categoriasContainer"></div>
   </section>
 
   <!-- AVISOS POPULARES -->
   <h2 class="section-title">Avisos Populares</h2>
-  <div class="cards-grid" id="popularesGrid">
-    <!-- Se llenan dinÃ¡micamente -->
-  </div>
+  <div class="cards-grid" id="popularesGrid"></div>
 
   <!-- TODOS LOS AVISOS -->
   <h2 class="section-title">Todos los avisos</h2>
-  <div class="cards-grid" id="avisosGrid">
-    <!-- Se llenan dinÃ¡micamente -->
-  </div>
+  <div class="cards-grid" id="avisosGrid"></div>
 
   <!-- FORMULARIO PUBLICAR AVISO -->
-  <section class="form-section" id="publicar">
+  <section class="form-section" id="publicar" style="display:none;">
     <div class="form-card">
       <h2>Publicar un aviso</h2>
       <form id="avisoForm" onsubmit="submitAviso(event)">
+
+        <!-- DATOS DEL USUARIO -->
+        <div class="form-group">
+          <label>Nombre completo *</label>
+          <input type="text" id="avisoNombre" placeholder="Tu nombre" required>
+        </div>
+
+        <div class="form-group">
+          <label>Correo electrÃ³nico *</label>
+          <input type="email" id="avisoCorreo" placeholder="tu@correo.com" required>
+        </div>
+
+        <div class="form-group">
+          <label>TelÃ©fono de contacto</label>
+          <input type="tel" id="avisoTelefono" placeholder="Ej: 11-1234-5678">
+        </div>
+
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <input type="tel" id="avisoWhatsapp" placeholder="Ej: 5491112345678">
+          <small>Incluye cÃ³digo de paÃ­s (549 para Argentina)</small>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;">
+
+        <!-- DATOS DEL AVISO -->
         <div class="form-group">
           <label>TÃ­tulo del aviso *</label>
           <input type="text" id="avisoTitulo" placeholder="Ej: Vendo bici usada" required>
@@ -72,17 +92,6 @@
         </div>
 
         <div class="form-group">
-          <label>TelÃ©fono de contacto</label>
-          <input type="tel" id="avisoTelefono" placeholder="Ej: 11-1234-5678">
-        </div>
-
-        <div class="form-group">
-          <label>WhatsApp</label>
-          <input type="tel" id="avisoWhatsapp" placeholder="Ej: 5491112345678">
-          <small>Incluye cÃ³digo de paÃ­s (549 para Argentina)</small>
-        </div>
-
-        <div class="form-group">
           <label>Fotos (mÃ¡ximo 3)</label>
           <input type="file" id="avisoFotos" accept="image/*" multiple onchange="previewFotos(event)">
           <div id="fotosPreview" style="display:flex;flex-wrap:wrap;margin-top:8px;"></div>
@@ -94,8 +103,9 @@
   </section>
 
   <!-- FOOTER -->
-  <footer style="text-align:center;padding:24px;color:#6b7280;font-size:.875rem;">
-    <p>Mercado Amigo Â© 2026 - Avisos comunitarios</p>
+  <footer style="text-align:center;padding:24px;color:#6b7280;font-size:.875rem;border-top:1px solid #e5e7eb;">
+    <p><strong>Mercado Amigo Â© 2026</strong> - Avisos comunitarios</p>
+    <p style="margin-top:8px;font-size:.8rem;">Mercado Amigo se reserva el derecho de publicar, rechazar o eliminar avisos sin previo aviso. Los contenidos publicados son responsabilidad exclusiva de sus autores.</p>
   </footer>
 
   <!-- MODAL VER AVISO -->
@@ -110,9 +120,27 @@
     </div>
   </div>
 
+  <!-- POPUP NORMAS -->
+  <div class="modal-overlay" id="normasPopup">
+    <div class="modal" style="max-width:650px;">
+      <button class="modal-close" onclick="closeNormasPopup()">Ã—</button>
+      <h2>Normas de Contenido y Responsabilidad</h2>
+      <div class="normas-text" id="normasTextDisplay" style="white-space:pre-line;line-height:1.8;color:#374151;margin:16px 0;padding:16px;background:#f9fafb;border-radius:8px;"></div>
+
+      <label class="normas-check-label" style="display:flex;align-items:flex-start;gap:12px;margin:20px 0;padding:12px;background:#fef3c7;border-radius:8px;cursor:pointer;">
+        <input type="checkbox" id="normasCheckbox" onchange="toggleNormasConfirm()" style="margin-top:3px;min-width:18px;height:18px;">
+        <span style="font-weight:500;">Acepto las normas de contenido y me hago responsable de la informaciÃ³n publicada en mi aviso.</span>
+      </label>
+
+      <div style="display:flex;gap:12px;">
+        <button onclick="closeNormasPopup()" style="flex:1;padding:12px;background:#e5e7eb;border:none;border-radius:8px;cursor:pointer;font-weight:600;color:#374151;">Cancelar</button>
+        <button id="normasConfirmBtn" onclick="confirmarNormas()" disabled style="flex:1;padding:12px;background:#2563eb;border:none;border-radius:8px;cursor:pointer;font-weight:600;color:white;opacity:0.5;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
   <script>
-    // Cargar la pÃ¡gina principal
     document.addEventListener('DOMContentLoaded', function() {
       loadMainPage();
     });
