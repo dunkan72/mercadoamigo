@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercado Amigo - Avisos Comunitarios</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">Mercado<span>Amigo</span></a>
+    <div class="nav-links">
+      <a href="#publicar">Publicar aviso</a>
+      <a href="admin.html" class="btn-admin">Admin</a>
+    </div>
+  </nav>
+
+  <!-- HERO + BUSCADOR -->
+  <section class="hero">
+    <h1>Encuentra lo que necesitas en tu comunidad</h1>
+    <p>Publica y descubre avisos de tu barrio de forma fÃ¡cil y gratuita</p>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Buscar avisos..." onkeyup="buscarAvisos()">
+      <button onclick="buscarAvisos()">Buscar</button>
+      <button onclick="limpiarFiltro()" style="background:#6b7280;">Limpiar</button>
+    </div>
+  </section>
+
+  <!-- CATEGORÃAS -->
+  <section class="categories">
+    <h2>CategorÃ­as</h2>
+    <div class="cat-grid" id="categoriasContainer">
+      <!-- Se llenan dinÃ¡micamente -->
+    </div>
+  </section>
+
+  <!-- AVISOS POPULARES -->
+  <h2 class="section-title">Avisos Populares</h2>
+  <div class="cards-grid" id="popularesGrid">
+    <!-- Se llenan dinÃ¡micamente -->
+  </div>
+
+  <!-- TODOS LOS AVISOS -->
+  <h2 class="section-title">Todos los avisos</h2>
+  <div class="cards-grid" id="avisosGrid">
+    <!-- Se llenan dinÃ¡micamente -->
+  </div>
+
+  <!-- FORMULARIO PUBLICAR AVISO -->
+  <section class="form-section" id="publicar">
+    <div class="form-card">
+      <h2>Publicar un aviso</h2>
+      <form id="avisoForm" onsubmit="submitAviso(event)">
+        <div class="form-group">
+          <label>TÃ­tulo del aviso *</label>
+          <input type="text" id="avisoTitulo" placeholder="Ej: Vendo bici usada" required>
+        </div>
+
+        <div class="form-group">
+          <label>CategorÃ­a *</label>
+          <select id="avisoCategoria" required>
+            <option value="">Selecciona una categorÃ­a</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>DescripciÃ³n *</label>
+          <textarea id="avisoDescripcion" placeholder="Describe tu aviso con detalle..." required></textarea>
+          <small>MÃ¡ximo 500 caracteres</small>
+        </div>
+
+        <div class="form-group">
+          <label>TelÃ©fono de contacto</label>
+          <input type="tel" id="avisoTelefono" placeholder="Ej: 11-1234-5678">
+        </div>
+
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <input type="tel" id="avisoWhatsapp" placeholder="Ej: 5491112345678">
+          <small>Incluye cÃ³digo de paÃ­s (549 para Argentina)</small>
+        </div>
+
+        <div class="form-group">
+          <label>Fotos (mÃ¡ximo 3)</label>
+          <input type="file" id="avisoFotos" accept="image/*" multiple onchange="previewFotos(event)">
+          <div id="fotosPreview" style="display:flex;flex-wrap:wrap;margin-top:8px;"></div>
+        </div>
+
+        <button type="submit" class="btn-submit">Publicar aviso</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="text-align:center;padding:24px;color:#6b7280;font-size:.875rem;">
+    <p>Mercado Amigo Â© 2026 - Avisos comunitarios</p>
+  </footer>
+
+  <!-- MODAL VER AVISO -->
+  <div class="modal-overlay" id="avisoModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">Ã—</button>
+      <h2 id="modalTitle"></h2>
+      <div class="modal-category" id="modalCategory"></div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="modal-photos" id="modalPhotos"></div>
+      <div class="contact-row" id="modalContact" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Cargar la pÃ¡gina principal
+    document.addEventListener('DOMContentLoaded', function() {
+      loadMainPage();
+    });
+  </script>
+</body>
+</html>
