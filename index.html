@@ -12,7 +12,7 @@
   <nav class="navbar">
     <a href="index.html" class="logo">Mercado<span>Amigo</span></a>
     <div class="nav-links">
-      <a href="#" onclick="openNormasPopup(); return false;">Publicar aviso</a>
+      <a href="#publicar">Publicar aviso</a>
       <a href="admin.html" class="btn-admin">Admin</a>
     </div>
   </nav>
@@ -43,10 +43,10 @@
   <div class="cards-grid" id="avisosGrid"></div>
 
   <!-- FORMULARIO PUBLICAR AVISO -->
-  <section class="form-section" id="publicar" style="display:none;">
+  <section class="form-section" id="publicar">
     <div class="form-card">
       <h2>Publicar un aviso</h2>
-      <form id="avisoForm" onsubmit="submitAviso(event)">
+      <form id="avisoForm" onsubmit="openNormasFromForm(event)">
 
         <!-- DATOS DEL USUARIO -->
         <div class="form-group">
